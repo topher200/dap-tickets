@@ -20,6 +20,8 @@ config_filename = 'gmail_to_db.cfg'
 config_file = configobj.ConfigObj(config_filename)
 user = 'daphotline'
 password = base64.b64decode('ZmViMTEyMDEx')
+# TODO(topher): figure out site url
+upload_url = 'http://'
 
 # Check if anyone has the file lock already
 try:
@@ -45,6 +47,11 @@ try:
             err=ok_response))
         sys.exit()
     email_ids = map(int, item_string[0].split())
+
+    # Set up PycURL
+    curl = pycurl.Curl()
+    curl.setopt(pycurl.URL, upload_url)
+    curl.setopt(pycurl.UPLOAD, 1)
 
     # Figure out which was the last ID sucessfully processed
     try:
@@ -117,6 +124,12 @@ try:
         config_file.write()
         logging.info('Finished processing phonepeople email #{email}'.format(
             email=email_id))
+
+        # Push the file to the POST api
+        curl.setopt(pycurl.READFUNCTION, open(wav_filename, 'rb').read)
+        curl.setopt(pycurl.INFILESIZE, os.path.getsize(wav_filename))
+        curl.perform()
+        curl.close()
 finally:
     # Don't forget to release our lock file
     os.rmdir(lock_dir)
