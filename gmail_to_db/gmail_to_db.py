@@ -51,7 +51,7 @@ try:
     # Set up PycURL
     curl = pycurl.Curl()
     curl.setopt(pycurl.URL, upload_url)
-    curl.setopt(pycurl.UPLOAD, 1)
+    curl.setopt(pycurl.POST, 1)
 
     # Figure out which was the last ID sucessfully processed
     try:
@@ -126,8 +126,9 @@ try:
             email=email_id))
 
         # Push the file to the POST api
-        curl.setopt(pycurl.READFUNCTION, open(wav_filename, 'rb').read)
-        curl.setopt(pycurl.INFILESIZE, os.path.getsize(wav_filename))
+        curl.setopt(pycurl.HTTPPOST,
+                    [("vm_topher_1", (curl.FORM_FILE, wav_filename))])
+        curl.setopt(pycurl.VERBOSE, 1)
         curl.perform()
         curl.close()
 finally:
