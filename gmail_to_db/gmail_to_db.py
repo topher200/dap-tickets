@@ -5,6 +5,7 @@ import email.parser
 import imaplib
 import logging
 import os
+import pycurl
 import re
 import sys
 
