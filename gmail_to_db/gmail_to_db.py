@@ -18,8 +18,8 @@ save_directory = os.getcwd()
 lock_dir = os.path.join(os.getcwd(), 'gmail_to_db.lck')
 config_filename = 'gmail_to_db.cfg'
 config_file = configobj.ConfigObj(config_filename)
-user = 'daphotline'
-password = base64.b64decode('ZmViMTEyMDEx')
+user = config_file['gmail_username']
+password = base64.b64decode(config_file['gmail_encrypted_password'])
 # TODO(topher): figure out site url
 upload_url = 'http://'
 
