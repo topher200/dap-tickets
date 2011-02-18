@@ -1,12 +1,15 @@
 from __future__ import with_statement
+import MultipartPostHandler
 import base64
 import configobj
+import cookielib
 import email.parser
 import imaplib
 import logging
 import os
 import re
 import sys
+import urllib2
 
 # Set up logging
 logging.basicConfig(filename='gmail_to_db.log', level=logging.DEBUG,
@@ -20,6 +23,7 @@ config_filename = 'gmail_to_db.cfg'
 config_file = configobj.ConfigObj(config_filename)
 user = config_file['gmail_username']
 password = base64.b64decode(config_file['gmail_encrypted_password'])
+upload_url = "http://dap.sethirl.com/triage/create/1337/"
 
 # Check if anyone has the file lock already
 try:
@@ -117,6 +121,16 @@ try:
         config_file.write()
         logging.info('Finished processing phonepeople email #{email}'.format(
             email=email_id))
+
+        # Send the wav to the database with POST
+        cookies = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
+                                      MultipartPostHandler.MultipartPostHandler)
+        params = {"file" : open(wav_filename, "rb")}
+        try:
+          opener.open(upload_url, params)
+        except urllib2.HTTPError, error:
+          logging.fatal(error.read())
 finally:
     # Don't forget to release our lock file
     os.rmdir(lock_dir)
