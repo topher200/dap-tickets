@@ -135,6 +135,7 @@ try:
         try:
           opener.open(upload_url, params)
         except urllib2.HTTPError, error:
+          logging.fatal("POSTing to database failed. Error message:")
           logging.fatal(error.read())
 finally:
     # Don't forget to release our lock file
