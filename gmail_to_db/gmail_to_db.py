@@ -1,3 +1,5 @@
+''' Retrieves gmail messages and saves them to disk.
+'''
 from __future__ import with_statement
 import MultipartPostHandler
 import base64
@@ -52,15 +54,18 @@ try:
 
     # Figure out which was the last ID sucessfully processed
     try:
-        last_id = int(config_file['last_id'])
+        # DEBUG(topher): using a dummy start value so we don't pull the entire
+        # gmail account every run. fix on production server
+        last_id_processed = 150
+        # last_id_processed = int(config_file['last_id'])
     except KeyError:
         logging.error('config_file could not be read')
         sys.exit()
     logging.debug('Found {email_count} email ids, starting at {last_id}'.format(
-        email_count=email_ids[-1], last_id=last_id))
+        email_count=email_ids[-1], last_id=last_id_processed))
 
     # Check each email after our last id to see if it's a message we want
-    for email_id in email_ids[last_id:]:
+    for email_id in email_ids[last_id_processed:]:
         logging.debug("processing email_id: {id}".format(id=email_id))
         # fetching the mail, "`(RFC822)`" means "get the whole stuff"
         ok_response, data = gmail.fetch(email_id, "(RFC822)") 
@@ -117,7 +122,7 @@ try:
             file.write(part.get_payload(decode=True))
 
         # Record that we now have sucessfully processed this ID
-        config_file['last_id'] = email_id
+        config_file['last_id_processed'] = email_id
         config_file.write()
         logging.info('Finished processing phonepeople email #{email}'.format(
             email=email_id))
